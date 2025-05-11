@@ -9,7 +9,7 @@ import (
 )
 
 func TestError_Error(t *testing.T) {
-	err := &Error{
+	err := &errCode{
 		code:  404,
 		error: errors.New("not found"),
 	}
@@ -17,7 +17,7 @@ func TestError_Error(t *testing.T) {
 }
 
 func TestError_Code(t *testing.T) {
-	err := &Error{
+	err := &errCode{
 		code: 500,
 	}
 	assert.Equal(t, 500, err.Code())
@@ -25,7 +25,7 @@ func TestError_Code(t *testing.T) {
 
 func TestError_Unwrap(t *testing.T) {
 	innerErr := errors.New("inner error")
-	err := &Error{
+	err := &errCode{
 		error: innerErr,
 	}
 	assert.Equal(t, innerErr, err.Unwrap())
@@ -33,31 +33,31 @@ func TestError_Unwrap(t *testing.T) {
 
 func TestError_Is(t *testing.T) {
 	t.Run("nil error", func(t *testing.T) {
-		err := &Error{code: 400}
+		err := &errCode{code: 400}
 		assert.False(t, err.Is(nil))
 	})
 
 	t.Run("same error", func(t *testing.T) {
-		err := &Error{code: 400}
+		err := &errCode{code: 400}
 		assert.True(t, err.Is(err))
 	})
 
 	t.Run("same code", func(t *testing.T) {
-		err1 := &Error{code: 400}
-		err2 := &Error{code: 400}
+		err1 := &errCode{code: 400}
+		err2 := &errCode{code: 400}
 		assert.True(t, err1.Is(err2))
 	})
 
 	t.Run("different code", func(t *testing.T) {
-		err1 := &Error{code: 400}
-		err2 := &Error{code: 500}
+		err1 := &errCode{code: 400}
+		err2 := &errCode{code: 500}
 		assert.False(t, err1.Is(err2))
 	})
 }
 
 func TestError_Cause(t *testing.T) {
 	innerErr := errors.New("inner error")
-	err := &Error{
+	err := &errCode{
 		error: innerErr,
 	}
 	assert.Equal(t, innerErr, err.Cause())
@@ -66,8 +66,8 @@ func TestError_Cause(t *testing.T) {
 func TestError_As(t *testing.T) {
 
 	t.Run("valid target", func(t *testing.T) {
-		err := &Error{error: errors.New("test")}
-		var target *Error
+		err := &errCode{error: errors.New("test")}
+		var target *errCode
 		assert.True(t, err.As(&target))
 		assert.Equal(t, err, target)
 	})
@@ -142,7 +142,7 @@ func TestWithMessagef(t *testing.T) {
 
 func TestCause(t *testing.T) {
 	innerErr := errors.New("inner error")
-	err := &Error{
+	err := &errCode{
 		error: innerErr,
 	}
 	assert.Equal(t, innerErr, Cause(err))

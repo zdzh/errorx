@@ -51,7 +51,7 @@ type Error struct {
 ```
 
 ### 主要方法
-
+- `func WithCode(err error, code ErrorCode) error`
 - `func WithStack(err error, code ErrorCode) error`
 - `func Wrap(err error, code ErrorCode, message string) error`
 - `func Wrapf(err error, code ErrorCode, format string, args ...interface{}) error`
