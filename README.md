@@ -52,12 +52,71 @@ type Error struct {
 
 ### 主要方法
 - `func WithCode(err error, code ErrorCode) error`
-- `func WithStack(err error, code ErrorCode) error`
+  - 为错误添加错误码,不修改原始错误信息
+  - 参数:
+    - err: 原始错误
+    - code: 要添加的错误码
+  - 返回: 包含错误码的新错误
+
+- `func WithStack(err error, code ErrorCode) error` 
+  - 为错误添加调用栈信息和错误码
+  - 参数:
+    - err: 原始错误
+    - code: 要添加的错误码
+  - 返回: 包含调用栈和错误码的新错误
+
 - `func Wrap(err error, code ErrorCode, message string) error`
+  - 包装错误,添加新的错误信息、错误码和调用栈
+  - 参数:
+    - err: 原始错误
+    - code: 要添加的错误码
+    - message: 新的错误信息
+  - 返回: 包装后的新错误
+
 - `func Wrapf(err error, code ErrorCode, format string, args ...interface{}) error`
+  - 格式化包装错误,类似 Wrap 但支持格式化错误信息
+  - 参数:
+    - err: 原始错误
+    - code: 要添加的错误码
+    - format: 错误信息格式
+    - args: 格式化参数
+  - 返回: 包装后的新错误
+
 - `func WithMessage(err error, code ErrorCode, message string) error`
+  - 为错误添加新的错误信息和错误码,不添加调用栈
+  - 参数: 
+    - err: 原始错误
+    - code: 要添加的错误码
+    - message: 新的错误信息
+  - 返回: 包含新信息的错误
+
 - `func WithMessagef(err error, code ErrorCode, format string, args ...interface{}) error`
+  - 为错误添加格式化的新错误信息和错误码,不添加调用栈
+  - 参数:
+    - err: 原始错误
+    - code: 要添加的错误码
+    - format: 错误信息格式
+    - args: 格式化参数
+  - 返回: 包含新信息的错误
+
 - `func Cause(err error) error`
+  - 获取错误链中的根本原因错误
+  - 参数:
+    - err: 要解析的错误
+  - 返回: 最原始的错误
+
+- `func SetDefaultCode(code ErrorCode)`
+  - 设置默认的错误码
+  - 参数:
+    - code: 要设置的默认错误码
+  - 说明: 当创建新的错误时，如果没有指定错误码，将使用此默认错误码
+
+- `func Code(err error) ErrorCode`
+  - 获取错误中的错误码
+  - 参数:
+    - err: 要获取错误码的错误
+  - 返回: 
+    - ErrorCode: 如果错误包含错误码则返回对应错误码，否则返回默认错误码
 
 ## 贡献指南
 
@@ -72,8 +131,6 @@ type Error struct {
 ## 许可证
 
 MIT 许可证，详情请见 LICENSE 文件。
-```
 
 这个README文件包含了项目的基本信息、安装方法、使用示例、API文档、贡献指南和许可证信息，可以帮助用户快速了解和使用ErrorX库。
 
-        
