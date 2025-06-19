@@ -2,6 +2,7 @@ package errcode
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/pkg/errors"
 )
@@ -36,7 +37,7 @@ func (e *errCode) Is(err error) bool {
 	if e == err {
 		return true
 	}
-	// 修正类型断言错误，推测原代码可能想判断 err 是否实现了 Code 方法
+
 	if errWithCode, ok := err.(interface{ Code() ErrorCode }); ok {
 		return e.code == errWithCode.Code()
 	}
@@ -53,6 +54,23 @@ func (e *errCode) As(target interface{}) bool {
 	return errors.As(e, target)
 }
 
+func (w *errCode) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if s.Flag('+') {
+			fmt.Fprintf(s, "[%d] %+v",w.Code(), w.Cause())
+			return
+		}
+		fallthrough
+	case 's':
+		io.WriteString(s, w.Error())
+	case 'q':
+		fmt.Fprintf(s, "%q", w.Error())
+	}
+}
+
+
+
 // WithCode 内部函数，用于创建带有错误码的Error实例
 func WithCode(err error, code ErrorCode) *errCode {
 	return &errCode{code: code, error: err}
@@ -65,25 +83,55 @@ func WithStack(err error, code ErrorCode) error {
 
 // Wrap 包装错误并添加错误码和消息
 func Wrap(err error, code ErrorCode, message string) error {
-	return errors.Wrap(WithCode(err, code), message)
+	return WithCode(errors.Wrap(err, message), code)
 }
 
 // Wrapf 包装错误并添加错误码和格式化消息
 func Wrapf(err error, code ErrorCode, format string, args ...interface{}) error {
-	return errors.Wrapf(WithCode(err, code), format, args...)
+	return WithCode(errors.Wrapf(err, format, args...), code)
 }
 
 // WithMessage 添加错误码和消息，但不包装错误
 func WithMessage(err error, code ErrorCode, message string) error {
-	return errors.WithMessage(WithCode(err, code), message)
+	return WithCode(errors.WithMessage(err, message), code)
 }
 
 // WithMessagef 添加错误码和格式化消息，但不包装错误
 func WithMessagef(err error, code ErrorCode, format string, args ...interface{}) error {
-	return errors.WithMessagef(WithCode(err, code), format, args...)
+	return WithCode(errors.WithMessagef(err, format, args...), code)
 }
 
 // Cause 返回错误的根本原因
 func Cause(err error) error {
 	return errors.Cause(err)
+}
+
+// 返回错误码
+var defaultErrorCode ErrorCode = -1
+
+// SetDefaultCode 允许设置全局默认错误码
+func SetDefaultCode(code ErrorCode) {
+	defaultErrorCode = code
+}
+
+// Code 返回错误的错误码，如果没有则返回全局默认错误码
+func Code(err error) ErrorCode {
+	if err == nil {
+		return defaultErrorCode
+	}
+	//
+	for err != nil {
+		if errWithCode, ok := err.(interface{ Code() ErrorCode }); ok {
+			return errWithCode.Code()
+		}
+		// 尝试解包
+		type unwrapper interface{ Unwrap() error }
+		if uw, ok := err.(unwrapper); ok {
+			err = uw.Unwrap()
+		} else {
+			break
+		}
+	}
+
+	return defaultErrorCode
 }

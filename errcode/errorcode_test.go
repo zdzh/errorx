@@ -8,12 +8,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func assertError(t *testing.T, err error, code int, message string) {
+	
+	assert.NotNil(t, err)
+	assert.Equal(t, code, Code(err))
+	assert.Equal(t, fmt.Sprintf("[%d] %s", code, message), err.Error())
+}
+
 func TestError_Error(t *testing.T) {
-	err := &errCode{
+	var err error = &errCode{
 		code:  404,
 		error: errors.New("not found"),
 	}
 	assert.Equal(t, "[404] not found", err.Error())
+
+
+	assertError(t, WithCode(errors.New("internal server error"), 500), 500, "internal server error")
+	assertError(t, WithMessage(errors.New("bad request"), 400, "invalid input"), 400, "invalid input: bad request")
+	assertError(t, WithMessagef(errors.New("bad request"), 400, "invalid input %s", "details"), 400, "invalid input details: bad request")
+	assertError(t, WithStack(errors.New("internal server error"), 500), 500, "internal server error")
+	assertError(t, Wrap(errors.New("bad request"), 400, "invalid input"), 400, "invalid input: bad request")
+	assertError(t, Wrapf(errors.New("bad request"), 400, "invalid input %s", "details"), 400, "invalid input details: bad request")
+
 }
 
 func TestError_Code(t *testing.T) {
@@ -93,26 +109,29 @@ func TestWrapf(t *testing.T) {
 	t.Run("format %v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := Wrapf(err, 500, "wrapped %v", "error")
-		assert.Equal(t, "wrapped error: [500] test", wrapped.Error())
+		assert.Equal(t, "[500] wrapped error: test", wrapped.Error())
 	})
 
 	t.Run("format %+v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := Wrapf(err, 500, "wrapped %+v", "error")
-		assert.Equal(t, "wrapped error: [500] test", wrapped.Error())
+		assert.Equal(t, "[500] wrapped error: test", wrapped.Error())
 	})
+
 	t.Run("print %v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := Wrapf(err, 500, "wrapped %v", "error")
-		assert.Equal(t, "wrapped error: [500] test", fmt.Sprintf("%v", wrapped))
+		assert.Equal(t, "[500] wrapped error: test", fmt.Sprintf("%v", wrapped))
 	})
+
 	t.Run("print %+v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := Wrapf(err, 500, "wrapped %+v", "error")
-		// 修改预期输出以匹配实际的堆栈信息格式
-		assert.Contains(t, fmt.Sprintf("%+v", wrapped), "[500] test")
+		// 使用 Contains 来检查堆栈信息的关键部分
+		assert.Contains(t, fmt.Sprintf("%+v", wrapped), "[500]")
+		assert.Contains(t, fmt.Sprintf("%+v", wrapped), "test")
 		assert.Contains(t, fmt.Sprintf("%+v", wrapped), "wrapped error")
-		assert.Contains(t, fmt.Sprintf("%+v", wrapped), "github.com/zdzh/errorx/errcode.Wrapf")
+		assert.Contains(t, fmt.Sprintf("%+v", wrapped), "github.com/zdzh/errorx/errcode.TestWrapf")
 	})
 }
 
@@ -130,13 +149,13 @@ func TestWithMessagef(t *testing.T) {
 	t.Run("format %v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := WithMessagef(err, 500, "message %v", "formatted")
-		assert.Equal(t, "message formatted: [500] test", wrapped.Error())
+		assert.Equal(t, "[500] message formatted: test", wrapped.Error())
 	})
 
 	t.Run("format %+v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := WithMessagef(err, 500, "message %+v", "formatted")
-		assert.Equal(t, "message formatted: [500] test", wrapped.Error())
+		assert.Equal(t, "[500] message formatted: test", wrapped.Error())
 	})
 }
 
