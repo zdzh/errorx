@@ -16,7 +16,7 @@ type errCode struct {
 }
 
 func (e *errCode) Error() string {
-	return fmt.Sprintf("[%d] %s", e.code, e.error.Error())
+	return fmt.Sprintf("%s", e.error.Error())
 }
 
 // Code 返回错误码
@@ -61,7 +61,7 @@ func (w *errCode) Format(s fmt.State, verb rune) {
 			fmt.Fprintf(s, "[%d] %+v",w.Code(), w.Cause())
 			return
 		}
-		fallthrough
+		fmt.Fprintf(s, "[%d] %v",w.Code(), w.Cause())
 	case 's':
 		io.WriteString(s, w.Error())
 	case 'q':

@@ -12,7 +12,7 @@ func assertError(t *testing.T, err error, code int, message string) {
 	
 	assert.NotNil(t, err)
 	assert.Equal(t, code, Code(err))
-	assert.Equal(t, fmt.Sprintf("[%d] %s", code, message), err.Error())
+	assert.Equal(t, fmt.Sprintf("%s", message), err.Error())
 }
 
 func TestError_Error(t *testing.T) {
@@ -20,7 +20,7 @@ func TestError_Error(t *testing.T) {
 		code:  404,
 		error: errors.New("not found"),
 	}
-	assert.Equal(t, "[404] not found", err.Error())
+	assert.Equal(t, "not found", err.Error())
 
 
 	assertError(t, WithCode(errors.New("internal server error"), 500), 500, "internal server error")
@@ -109,13 +109,13 @@ func TestWrapf(t *testing.T) {
 	t.Run("format %v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := Wrapf(err, 500, "wrapped %v", "error")
-		assert.Equal(t, "[500] wrapped error: test", wrapped.Error())
+		assert.Equal(t, "wrapped error: test", wrapped.Error())
 	})
 
 	t.Run("format %+v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := Wrapf(err, 500, "wrapped %+v", "error")
-		assert.Equal(t, "[500] wrapped error: test", wrapped.Error())
+		assert.Equal(t, "wrapped error: test", wrapped.Error())
 	})
 
 	t.Run("print %v", func(t *testing.T) {
@@ -149,13 +149,13 @@ func TestWithMessagef(t *testing.T) {
 	t.Run("format %v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := WithMessagef(err, 500, "message %v", "formatted")
-		assert.Equal(t, "[500] message formatted: test", wrapped.Error())
+		assert.Equal(t, "message formatted: test", wrapped.Error())
 	})
 
 	t.Run("format %+v", func(t *testing.T) {
 		err := errors.New("test")
 		wrapped := WithMessagef(err, 500, "message %+v", "formatted")
-		assert.Equal(t, "[500] message formatted: test", wrapped.Error())
+		assert.Equal(t, "message formatted: test", wrapped.Error())
 	})
 }
 
