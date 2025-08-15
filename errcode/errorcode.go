@@ -69,6 +69,9 @@ func (w *errCode) Format(s fmt.State, verb rune) {
 	}
 }
 
+func New(msg string, code ErrorCode) *errCode {
+	return WitchCode(errors.New(msg), code)
+}
 
 
 // WithCode 内部函数，用于创建带有错误码的Error实例
