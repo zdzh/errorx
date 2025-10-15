@@ -110,10 +110,17 @@ func Cause(err error) error {
 
 // 返回错误码
 var defaultErrorCode ErrorCode = -1
+var defaultErr = New("internal error", defaultErrorCode)
 
 // SetDefaultCode 允许设置全局默认错误码
 func SetDefaultCode(code ErrorCode) {
 	defaultErrorCode = code
+}
+
+// SetDefaultCode 允许设置全局默认错误码
+func SetDefaultErr(code ErrorCode, message string) {
+	defaultErrorCode = code
+	defaultErr = New(message, code)
 }
 
 // Code 返回错误的错误码，如果没有则返回全局默认错误码

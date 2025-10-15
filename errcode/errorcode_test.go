@@ -167,3 +167,15 @@ func TestCause(t *testing.T) {
 	assert.Equal(t, innerErr, Cause(err))
 }
 
+
+func TestToCodeErr(t *testing.T) {
+	innerErr := errors.New("inner error")
+	assert.Equal(t, defaultErr, ToCodeErr(innerErr))
+	err := &errCode{
+		error: innerErr,
+	}
+	assert.Equal(t, err, ToCodeErr(innerErr, err))
+	assert.Equal(t, err, ToCodeErr(err))
+
+}
+
